@@ -278,8 +278,8 @@ impl<'a> APODList<'a> {
             Regex::new(r#"https://www.youtube.com/embed/(.+?)(?:\?.*|$)"#)
                 .map(|re| match re.captures(&img_url) {
                     Some(captures) => (
-                        format!("https://i.ytimg.com/vi/{}/maxresdefault.jpg", &captures[1]),
-                        String::from("i.ytimg.com"),
+                        format!("https://img.youtube.com/vi/{}/0.jpg", &captures[1]),
+                        String::from("img.youtube.com"),
                     ),
                     None => panic!("No Youtube ID found in {}!", img_url),
                 })
