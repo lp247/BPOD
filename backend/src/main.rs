@@ -331,7 +331,7 @@ fn normalize_text(text: &str, url_root: &str) -> String {
     let href_attr_regex = r"(?:ref|href|rhef|hre|hef)";
     let link_text_regex = r"(?P<text>.+?)";
     let link_url_regex = r"(?P<url>\S+?)";
-    let link_closing_tag_regex = r"(?:</[aA]>|<\?=/a>)";
+    let link_closing_tag_regex = r"(?:</[aA]>|<\?=/a>|<a/>)";
     let link_regex = format!(
         r#"<[aA]\s+{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>){link_text}{link_closing_tag}"#,
         href_attr = href_attr_regex,
