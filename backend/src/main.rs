@@ -118,11 +118,14 @@ impl<'a> APODList<'a> {
         }
     }
 
-    pub async fn get_apod(&mut self, date: &str) -> Option<APODInfo> {
+    pub async fn get_apod(&mut self, date: &str) -> ScrapeResult<Option<APODInfo>> {
         if self.list_entries.len() == 0 {
             self.retrieve_list().await.unwrap();
         }
-        let target_list_entry = self.list_entries.iter().find(|&e| e.date == date)?;
+        let target_list_entry = match self.list_entries.iter().find(|&e| e.date == date) {
+            Some(value) => value,
+            None => return Ok(None),
+        };
         let sub_page = reqwest::get(format!("{}{}", self.url_root, target_list_entry.page_url))
             .await
             .unwrap()
@@ -212,9 +215,22 @@ impl<'a> APODList<'a> {
         let text_author_test_re = Regex::new(r#"Text"#).unwrap();
         assert!(!(text_author.len() == 0 && text_author_test_re.is_match(&sub_page)));
 
-        self.store_thumbnail(&img_url, date).await.unwrap();
+        let num_attempts: u64 = 5;
+        for attempt in 0..num_attempts {
+            match self.store_thumbnail(&img_url, date).await {
+                Ok(_) => break,
+                Err(e) => match attempt == num_attempts - 1 {
+                    true => return Err(ScrapeError),
+                    false => {
+                        let wait_time = time::Duration::from_secs((attempt + 1) * 2);
+                        thread::sleep(wait_time);
+                        continue;
+                    }
+                },
+            }
+        }
 
-        Some(APODInfo {
+        Ok(Some(APODInfo {
             id: None,
             date: String::from(date),
             img_url,
@@ -225,7 +241,7 @@ impl<'a> APODList<'a> {
             license,
             text_author,
             img_editor,
-        })
+        }))
     }
 
     async fn retrieve_list(&mut self) -> ScrapeResult<()> {
@@ -421,11 +437,12 @@ async fn main() -> () {
     while counter >= last_date {
         let date_str = format!("{}", counter.format("%Y-%m-%d"));
         let apod = match apod_list.get_apod(date_str.as_str()).await {
-            Some(apod) => apod,
-            None => {
+            Ok(Some(apod)) => apod,
+            Ok(None) => {
                 counter = counter - Duration::days(1);
                 continue;
-            },
+            }
+            Err(err) => panic!(err),
         };
         println!(
             // "Date: {}, Image URL: {}, Title: {}, Description: {}, Credit: {}, Image editor: {}, Text author: {}, Copyright: {}, License: {}",
