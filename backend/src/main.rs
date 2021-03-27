@@ -352,7 +352,7 @@ fn normalize_text(text: &str, url_root: &str) -> String {
         .into_owned();
 
     // </a> tag is too much in date 2020-10-30.
-    let artifacts_fixed: String = Regex::new(r#"</a>"#)
+    let artifacts_fixed: String = Regex::new(r#"(?:</a>|</b>)"#)
         .unwrap()
         .replace_all(link_fixed.as_str(), "")
         .into_owned();
