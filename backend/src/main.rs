@@ -174,7 +174,7 @@ impl<'a> APODList<'a> {
         .unwrap();
 
         let img_editor_test_re = Regex::new(r#"Processing"#).unwrap();
-        assert!(!(credit.len() == 0 && img_editor_test_re.is_match(&sub_page)));
+        assert!(!(img_editor.len() == 0 && img_editor_test_re.is_match(&sub_page)));
 
         let copyright: String = Regex::new(
             r#"<\w+?>[\s\S]*?Copyright[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
@@ -186,7 +186,7 @@ impl<'a> APODList<'a> {
         .unwrap();
 
         let copyright_test_re = Regex::new(r#"Copyright"#).unwrap();
-        assert!(!(credit.len() == 0 && copyright_test_re.is_match(&sub_page)));
+        assert!(!(copyright.len() == 0 && copyright_test_re.is_match(&sub_page)));
 
         let license: String = Regex::new(
             r#"<\w+?>[\s\S]*?License[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
@@ -198,7 +198,7 @@ impl<'a> APODList<'a> {
         .unwrap();
 
         let license_test_re = Regex::new(r#"License"#).unwrap();
-        assert!(!(credit.len() == 0 && license_test_re.is_match(&sub_page)));
+        assert!(!(license.len() == 0 && license_test_re.is_match(&sub_page)));
 
         let text_author: String = Regex::new(
             r#"<\w+?>[\s\S]*?Text[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
@@ -210,7 +210,7 @@ impl<'a> APODList<'a> {
         .unwrap();
 
         let text_author_test_re = Regex::new(r#"Text"#).unwrap();
-        assert!(!(credit.len() == 0 && text_author_test_re.is_match(&sub_page)));
+        assert!(!(text_author.len() == 0 && text_author_test_re.is_match(&sub_page)));
 
         self.store_thumbnail(&img_url, date).await.unwrap();
 
