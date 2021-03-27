@@ -330,11 +330,13 @@ fn normalize_text(text: &str, url_root: &str) -> String {
     let href_attr_regex = r"(?:ref|href|rhef|hre)";
     let link_text_regex = r"(?P<text>.+?)";
     let link_url_regex = r"(?P<url>\S+?)";
+    let link_closing_tag_regex = r"(?:</a>|<\?=/a>)";
     let link_regex = format!(
-        r#"<a\s+{href_attr}\s*=\s*"?{link_url}"?.*?>{link_text}</a>"#,
+        r#"<a\s+{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>){link_text}{link_closing_tag}"#,
         href_attr = href_attr_regex,
         link_text = link_text_regex,
         link_url = link_url_regex,
+        link_closing_tag = link_closing_tag_regex,
     );
     let link_fixed: String = Regex::new(link_regex.as_str())
         .unwrap()
@@ -413,7 +415,7 @@ async fn main() -> () {
 
     let last_date = Utc.ymd(1996, 1, 1);
     // let mut counter = Utc::today();
-    let mut counter = Utc.ymd(2020, 6, 12);
+    let mut counter = Utc.ymd(2020, 5, 14);
     let mut apod_list = APODList::new();
 
     while counter >= last_date {
