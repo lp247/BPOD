@@ -414,8 +414,7 @@ async fn main() -> () {
         .unwrap();
 
     let last_date = Utc.ymd(1996, 1, 1);
-    // let mut counter = Utc::today();
-    let mut counter = Utc.ymd(2020, 5, 14);
+    let mut counter = Utc::today();
     let mut apod_list = APODList::new();
 
     while counter >= last_date {
