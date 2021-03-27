@@ -1,0 +1,17 @@
+[package]
+name = "backend"
+version = "0.1.0"
+authors = ["Peter Lehnhardt <aliud@posteo.at>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio-postgres = "0.7.0"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.11", features = ["json", "stream"] }
+regex = "1"
+image = "0.23.14"
+base64 = "0.13.0"
+dirs = "3.0.1"
+chrono = "0.4.19"
