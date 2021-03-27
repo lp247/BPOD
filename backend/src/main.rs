@@ -139,7 +139,8 @@ impl<'a> APODList<'a> {
 
         assert!(description.len() > 0);
 
-        let img_url: String = Regex::new(r#"<(?:IMG SRC|iframe[\s\S]+?src)=["'](.+?)["']"#)
+        // TODO: Get image source not from image tag but from enclosing link
+        let img_url: String = Regex::new(r#"<(?:IMG SRC|img src|iframe[\s\S]+?src)=["'](.+?)["']"#)
             .map(|re| match re.captures(&sub_page) {
                 Some(capture) => match &capture[1].starts_with("http") {
                     true => normalize_text(&capture[1], self.url_root),
