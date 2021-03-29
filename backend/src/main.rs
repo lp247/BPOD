@@ -209,6 +209,7 @@ impl<'a> APODList<'a> {
                 .unwrap()
         } else if img_url.starts_with("https://apod.nasa.gov/apod/image")
             && !img_url.contains(".swf")
+            && !img_url.contains(".html")
         {
             (String::from(img_url), String::from("apod.nasa.gov"))
         } else {
