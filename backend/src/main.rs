@@ -207,7 +207,9 @@ impl<'a> APODList<'a> {
                     None => panic!("No Youtube ID found in {}!", img_url),
                 })
                 .unwrap()
-        } else if img_url.starts_with("https://apod.nasa.gov/apod/image") {
+        } else if img_url.starts_with("https://apod.nasa.gov/apod/image")
+            && !img_url.contains(".swf")
+        {
             (String::from(img_url), String::from("apod.nasa.gov"))
         } else {
             return Ok(());
