@@ -311,26 +311,44 @@ fn get_meta(page: &str, url_root: &str) -> String {
 }
 
 fn normalize_text(text: &str, url_root: &str) -> String {
-    let space_fix_regex = Regex::new(r"(?:\s{2,}|\n)").unwrap();
-    let space_fixed: String = space_fix_regex.replace_all(text, " ").into_owned();
-    let br_fixed: String = Regex::new(r"<br>")
+    let space_fixed: String = Regex::new(r"(?:\s|<br>|</br>)+")
         .unwrap()
-        .replace_all(space_fixed.as_str(), " ")
+        .replace_all(text, " ")
         .into_owned();
-    let i_fixed: String = Regex::new(r"<i>\s*(?P<content>.+?)\s*</i>")
+    let i_fixed: String =
+        Regex::new(r"<[iI]>\s*(?P<content>\S[\S\s]+?\S)\s*</[iI]>")
         .unwrap()
-        .replace_all(br_fixed.as_str(), "*$content*")
+            .replace_all(space_fixed.as_str(), "**$content**")
         .into_owned();
-    let b_fixed: String = Regex::new(r"<b>\s*(?P<content>.+?)\s*</b>")
+    let b_fixed: String =
+        Regex::new(r"<[bB]>\s*(?P<content>\S[\S\s]+?\S)\s*</[bB]>")
         .unwrap()
-        .replace_all(i_fixed.as_str(), "**$content**")
+            .replace_all(i_fixed.as_str(), "*$content*")
         .into_owned();
-    let href_attr_regex = r"(?:ref|href|rhef|hre|hef|hrf)";
+    let colon_order_fixed: String = Regex::new(r"(?P<stars>\*+):")
+        .unwrap()
+        .replace_all(b_fixed.as_str(), ":$stars")
+        .into_owned();
+    let mailto_fixed = Regex::new(r#"mailto:[\s\S]+""#)
+        .unwrap()
+        .replace_all(colon_order_fixed.as_str(), |captures: &regex::Captures| {
+            captures
+                .get(0)
+                .unwrap()
+                .as_str()
+                .replace(" ", "")
+                .replace("@at@", "@")
+                .replace(".dot.", ".")
+                .replace("[at]", "@")
+                .replace("[dot]", ".")
+        })
+        .into_owned();
+    let href_attr_regex = r"(?:ref|href|rhef|hre|hef|hrf|HREF)";
     let link_text_regex = r"(?P<text>.+?)";
     let link_url_regex = r"(?P<url>\S+?)";
-    let link_closing_tag_regex = r"(?:</[aA]>|<\?=/a>|<a/>)";
+    let link_closing_tag_regex = r"(?:</[aA]>|<\?=/a>|<a/>|</a/>)";
     let link_regex = format!(
-        r#"<[aA]\s+{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>|</a>){link_text}{link_closing_tag}"#,
+        r#"<[aA]\s*{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>|</a>){link_text}{link_closing_tag}"#,
         href_attr = href_attr_regex,
         link_text = link_text_regex,
         link_url = link_url_regex,
@@ -338,40 +356,43 @@ fn normalize_text(text: &str, url_root: &str) -> String {
     );
     let link_fixed: String = Regex::new(link_regex.as_str())
         .unwrap()
-        .replace_all(b_fixed.as_str(), |captures: &regex::Captures| {
+        .replace_all(mailto_fixed.as_str(), |captures: &regex::Captures| {
             let url = captures.name("url").unwrap().as_str();
             let text = captures.name("text").unwrap().as_str();
-            match url.starts_with("http") {
+            match url.starts_with("http") || url.starts_with("mailto:") {
                 true => format!("[{}]({})", text, url),
                 false => format!("[{}]({}{})", text, url_root, url),
             }
         })
         .into_owned();
 
-    // </a> tag is too much in date 2020-10-30.
-    let artifacts_fixed: String = Regex::new(r#"(?:</a>|</b>)"#)
+    let artifacts_fixed: String = Regex::new(r#"\s?(?:</a>|</b>)\s?"#)
         .unwrap()
-        .replace_all(link_fixed.as_str(), "")
+        .replace_all(
+            link_fixed.as_str(),
+            |captures: &regex::Captures| match captures
+                .get(0)
+                .expect("Could not get artifact")
+                .as_str()
+                .contains(" ")
+            {
+                true => " ",
+                false => "",
+            },
+        )
         .into_owned();
 
-    let space_fixed_again: String = space_fix_regex
-        .replace_all(artifacts_fixed.as_str(), " ")
-        .into_owned();
+    let trimmed = artifacts_fixed.trim();
 
-    let trimmed: String = Regex::new(r"(?:^\s|\s$)")
-        .unwrap()
-        .replace_all(space_fixed_again.as_str(), "")
-        .into_owned();
-
-    let test_re = Regex::new(r"(<|>|\s{2,}|^\s|\s$)").unwrap();
+    let test_re = Regex::new(r"(<|>|\s{2,}|^\s|\s$|mailto:\)|\*\s*:|:$)").unwrap();
     if test_re.is_match(&trimmed) {
         let captures = test_re.captures(&trimmed).unwrap();
         panic!(format!(
-            "Text not fixed completely - Found {} in {}",
-            &captures[1], trimmed
+            "Text not fixed completely - Found {} in {}\nUnformatted input: {}",
+            &captures[1], trimmed, text
         ));
     }
-    trimmed
+    String::from(trimmed)
 }
 
 #[tokio::main] // By default, tokio_postgres uses the tokio crate as its runtime.
