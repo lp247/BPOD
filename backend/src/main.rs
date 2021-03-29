@@ -130,7 +130,7 @@ impl<'a> APODList<'a> {
         for attempt in 0..num_attempts {
             match self.store_thumbnail(&img_url, date).await {
                 Ok(_) => break,
-                Err(e) => match attempt == num_attempts - 1 {
+                Err(_) => match attempt == num_attempts - 1 {
                     true => return Err(ScrapeError),
                     false => {
                         let wait_time = time::Duration::from_secs((attempt + 1) * 2);
