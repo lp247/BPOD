@@ -348,9 +348,10 @@ fn normalize_text(text: &str, url_root: &str) -> String {
                 .as_str()
                 .replace(" ", "")
                 .replace("@at@", "@")
-                .replace(".dot.", ".")
                 .replace("[at]", "@")
+                .replace(".dot.", ".")
                 .replace("[dot]", ".")
+                .replace(".d.o.t.", ".")
         })
         .into_owned();
     let href_attr_regex = r"(?:ref|href|rhef|hre|hef|hrf|HREF)";
