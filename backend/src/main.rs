@@ -312,13 +312,34 @@ fn get_meta(page: &str, url_root: &str) -> String {
 }
 
 fn normalize_text(text: &str, url_root: &str) -> String {
+    let href_attr_regex = r"(?:ref|href|rhef|hre|hef|hrf|HREF)";
+    let link_text_regex = r"(?P<text>.+?)";
+    let link_url_regex = r"(?P<url>\S+?)";
+    let link_regex = format!(
+        r#"<[aA]\s*{href_attr}\s*=\s*"?{link_url}(?:>|">|"\s>|"\s.*?>|"</a>){link_text}</a>"#,
+        href_attr = href_attr_regex,
+        link_text = link_text_regex,
+        link_url = link_url_regex,
+    );
+
+    // TODO: Fix &ccedil; &oacute; &eacute; &aacute; &amp; &oslash;
+    let new_line_in_src_fixed = Regex::new(format!(r#"{}\s*=\s*"[\s\S]+?""#, href_attr_regex).as_str())
+        .unwrap()
+        .replace_all(text, |captures: &regex::Captures| {
+            captures.get(0).unwrap().as_str().replace("\n", "")
+        })
+        .into_owned();
     let space_fixed: String = Regex::new(r"(?:\s|<br>|</br>)+")
         .unwrap()
-        .replace_all(text, " ")
+        .replace_all(new_line_in_src_fixed.as_str(), " ")
+        .into_owned();
+    let center_fixed: String = Regex::new(r"<center>\s*(?P<content>[\s\S]+?)\s*</center>")
+        .unwrap()
+        .replace_all(space_fixed.as_str(), "$content")
         .into_owned();
     let bad_link_closing_tag_fixed = Regex::new(r"(?:<\?=/a>|<a/>|</a/>|</A>)")
         .unwrap()
-        .replace_all(space_fixed.as_str(), "</a>")
+        .replace_all(center_fixed.as_str(), "</a>")
         .into_owned();
     let missing_closing_link_tag_fixed =
         Regex::new(r"(?P<first_tag><[aA][^>]+?>)(?P<content>[^>]+?)(?P<second_tag><[aA])")
@@ -355,15 +376,6 @@ fn normalize_text(text: &str, url_root: &str) -> String {
                 .replace(".d.o.t.", ".")
         })
         .into_owned();
-    let href_attr_regex = r"(?:ref|href|rhef|hre|hef|hrf|HREF)";
-    let link_text_regex = r"(?P<text>.+?)";
-    let link_url_regex = r"(?P<url>\S+?)";
-    let link_regex = format!(
-        r#"<[aA]\s*{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>|</a>){link_text}</a>"#,
-        href_attr = href_attr_regex,
-        link_text = link_text_regex,
-        link_url = link_url_regex,
-    );
     let link_fixed: String = Regex::new(link_regex.as_str())
         .unwrap()
         .replace_all(mailto_fixed.as_str(), |captures: &regex::Captures| {
