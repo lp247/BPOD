@@ -315,13 +315,23 @@ fn normalize_text(text: &str, url_root: &str) -> String {
         .unwrap()
         .replace_all(text, " ")
         .into_owned();
-    let i_fixed: String =
-        Regex::new(r"<[iI]>\s*(?P<content>\S[\S\s]+?\S)\s*</[iI]>")
+    let bad_link_closing_tag_fixed = Regex::new(r"(?:<\?=/a>|<a/>|</a/>|</A>)")
         .unwrap()
-            .replace_all(space_fixed.as_str(), "**$content**")
+        .replace_all(space_fixed.as_str(), "</a>")
         .into_owned();
-    let b_fixed: String =
-        Regex::new(r"<[bB]>\s*(?P<content>\S[\S\s]+?\S)\s*</[bB]>")
+    let missing_closing_link_tag_fixed =
+        Regex::new(r"(?P<first_tag><[aA][^>]+?>)(?P<content>[^>]+?)(?P<second_tag><[aA])")
+            .unwrap()
+            .replace_all(
+                bad_link_closing_tag_fixed.as_str(),
+                "${first_tag}${content}</a>${second_tag}",
+            )
+            .into_owned();
+    let i_fixed: String = Regex::new(r"<[iI]>\s*(?P<content>[\S\s]+?)\s*</[iI]>")
+        .unwrap()
+        .replace_all(missing_closing_link_tag_fixed.as_str(), "**$content**")
+        .into_owned();
+    let b_fixed: String = Regex::new(r"<[bB]>\s*(?P<content>[\S\s]+?)\s*</[bB]>")
         .unwrap()
             .replace_all(i_fixed.as_str(), "*$content*")
         .into_owned();
@@ -346,13 +356,11 @@ fn normalize_text(text: &str, url_root: &str) -> String {
     let href_attr_regex = r"(?:ref|href|rhef|hre|hef|hrf|HREF)";
     let link_text_regex = r"(?P<text>.+?)";
     let link_url_regex = r"(?P<url>\S+?)";
-    let link_closing_tag_regex = r"(?:</[aA]>|<\?=/a>|<a/>|</a/>)";
     let link_regex = format!(
-        r#"<[aA]\s*{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>|</a>){link_text}{link_closing_tag}"#,
+        r#"<[aA]\s*{href_attr}\s*=\s*"?{link_url}"?(?:>|\s>|\s.*?>|</a>){link_text}</a>"#,
         href_attr = href_attr_regex,
         link_text = link_text_regex,
         link_url = link_url_regex,
-        link_closing_tag = link_closing_tag_regex,
     );
     let link_fixed: String = Regex::new(link_regex.as_str())
         .unwrap()
