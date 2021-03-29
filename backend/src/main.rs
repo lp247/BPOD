@@ -27,11 +27,7 @@ pub struct APODInfo {
     img_url: String,
     title: String,
     description: String,
-    credit: String,
-    img_editor: String,
-    text_author: String,
-    copyright: String,
-    license: String,
+    meta: String,
 }
 
 impl APODInfo {
@@ -40,24 +36,16 @@ impl APODInfo {
         date: String,
         img_url: String,
         title: String,
-        credit: String,
         description: String,
-        copyright: String,
-        license: String,
-        text_author: String,
-        img_editor: String,
+        meta: String,
     ) -> Self {
         Self {
             id,
             date,
             img_url,
             title,
-            credit,
             description,
-            copyright,
-            license,
-            img_editor,
-            text_author,
+            meta,
         }
     }
     pub async fn save(&self, client: Client) -> Result<u64, PGError> {
@@ -68,15 +56,15 @@ impl APODInfo {
     }
     async fn update(&self, client: Client) -> Result<u64, PGError> {
         let stmt = format!(
-            "UPDATE pictures SET date = '{}', url = '{}', title = '{}', credit = '{}', description = '{}' WHERE id = {};",
-            self.date, self.img_url, self.title.replace("'", "''"), self.credit.replace("'", "''"), self.description.replace("'", "''"), self.id.unwrap()
+            "UPDATE pictures SET date = '{}', url = '{}', title = '{}', description = '{}', meta = '{}' WHERE id = {};",
+            self.date, self.img_url, self.title.replace("'", "''"), self.description.replace("'", "''"), self.meta.replace("'", "''"), self.id.unwrap()
         );
         client.execute(stmt.as_str(), &[]).await
     }
     async fn create(&self, client: Client) -> Result<u64, PGError> {
         let stmt = format!(
-            "INSERT INTO pictures (date, url, title, credit, description) VALUES ('{}', '{}', '{}', '{}', '{}');",
-            self.date, self.img_url, self.title.replace("'", "''"), self.credit.replace("'", "''"), self.description.replace("'", "''")
+            "INSERT INTO pictures (date, url, title, description, meta) VALUES ('{}', '{}', '{}', '{}', '{}');",
+            self.date, self.img_url, self.title.replace("'", "''"), self.description.replace("'", "''"), self.meta.replace("'", "''")
         );
         client.execute(stmt.as_str(), &[]).await
     }
@@ -133,87 +121,10 @@ impl<'a> APODList<'a> {
             .await
             .unwrap();
 
-        let description: String = Regex::new(r#"<.+?>\s*Explanation:\s*<.+?>\s*([\s\S]+?)\s*<p>"#)
-            .map(|re| match re.captures(&sub_page) {
-                Some(capture) => normalize_text(&capture[1], self.url_root),
-                None => String::new(),
-            })
-            .unwrap();
-
-        assert!(description.len() > 0);
-
-        // TODO: Get image source not from image tag but from enclosing link
-        let img_url: String = Regex::new(r#"<(?:IMG SRC|img src|iframe[\s\S]+?src)=["'](.+?)["']"#)
-            .map(|re| match re.captures(&sub_page) {
-                Some(capture) => match &capture[1].starts_with("http") {
-                    true => normalize_text(&capture[1], self.url_root),
-                    false => format!("{}{}", self.url_root, &capture[1]),
-                },
-                None => String::new(),
-            })
-            .unwrap();
-
-        assert!(img_url.len() > 0);
-
-        let credit: String = Regex::new(
-            r#"<\w+?>[\s\S]*?Credit[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
-        )
-        .map(|re| match re.captures(&sub_page) {
-            Some(capture) => normalize_text(&capture[1], self.url_root),
-            None => String::new(),
-        })
-        .unwrap();
-
-        let credit_test_re = Regex::new(r#"Credit"#).unwrap();
-        assert!(!(credit.len() == 0 && credit_test_re.is_match(&sub_page)));
-
-        let img_editor: String = Regex::new(
-            r#"<\w+?>[\s\S]*?Processing[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
-        )
-        .map(|re| match re.captures(&sub_page) {
-            Some(capture) => normalize_text(&capture[1], self.url_root),
-            None => String::new(),
-        })
-        .unwrap();
-
-        let img_editor_test_re = Regex::new(r#"Processing"#).unwrap();
-        assert!(!(img_editor.len() == 0 && img_editor_test_re.is_match(&sub_page)));
-
-        let copyright: String = Regex::new(
-            r#"<\w+?>[\s\S]*?Copyright[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
-        )
-        .map(|re| match re.captures(&sub_page) {
-            Some(capture) => normalize_text(&capture[1], self.url_root),
-            None => String::new(),
-        })
-        .unwrap();
-
-        let copyright_test_re = Regex::new(r#"Copyright"#).unwrap();
-        assert!(!(copyright.len() == 0 && copyright_test_re.is_match(&sub_page)));
-
-        let license: String = Regex::new(
-            r#"<\w+?>[\s\S]*?License[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
-        )
-        .map(|re| match re.captures(&sub_page) {
-            Some(capture) => normalize_text(&capture[1], self.url_root),
-            None => String::new(),
-        })
-        .unwrap();
-
-        let license_test_re = Regex::new(r#"License"#).unwrap();
-        assert!(!(license.len() == 0 && license_test_re.is_match(&sub_page)));
-
-        let text_author: String = Regex::new(
-            r#"<\w+?>[\s\S]*?Text[\s\S]*?:\s*</\w+?>\s*([\s\S]+?)\s*;?\s*<(?:/center|p|i|b)"#,
-        )
-        .map(|re| match re.captures(&sub_page) {
-            Some(capture) => normalize_text(&capture[1], self.url_root),
-            None => String::new(),
-        })
-        .unwrap();
-
-        let text_author_test_re = Regex::new(r#"Text"#).unwrap();
-        assert!(!(text_author.len() == 0 && text_author_test_re.is_match(&sub_page)));
+        let description = get_description(&sub_page, self.url_root);
+        let img_url = get_img_url(&sub_page, self.url_root);
+        let title = get_title(&sub_page, self.url_root);
+        let meta = get_meta(&sub_page, self.url_root);
 
         let num_attempts: u64 = 5;
         for attempt in 0..num_attempts {
@@ -234,13 +145,9 @@ impl<'a> APODList<'a> {
             id: None,
             date: String::from(date),
             img_url,
-            title: String::from(&target_list_entry.title),
-            credit,
+            title,
             description,
-            copyright,
-            license,
-            text_author,
-            img_editor,
+            meta,
         }))
     }
 
@@ -327,6 +234,78 @@ impl<'a> APODList<'a> {
             .unwrap();
         Ok(())
     }
+}
+
+fn get_description(page: &str, url_root: &str) -> String {
+    let regex =
+        Regex::new(r#"<.+?>\s*Explanation:\s*<.+?>\s*(?P<explanation>[\s\S]+?)\s*<p>"#).unwrap();
+    let raw_description = regex
+        .captures(page)
+        .unwrap()
+        .name("explanation")
+        .unwrap()
+        .as_str();
+    normalize_text(raw_description, url_root)
+}
+
+fn get_img_url(page: &str, url_root: &str) -> String {
+    // TODO: Get image source not from image tag but from enclosing link
+    let regex = Regex::new(
+        r#"<(?:IMG SRC|img src|iframe[\s\S]+?src|object[\s\S]+?data)=["'](?P<url>.+?)["']"#,
+    )
+    .unwrap();
+    let captures = regex.captures(page).expect("Could not find image source");
+    let url = captures
+        .name("url")
+        .expect("URL not found in image source")
+        .as_str();
+    match url.starts_with("http") {
+        true => String::from(url),
+        false => format!("{}{}", url_root, url),
+    }
+}
+
+fn get_meta_block(page: &str) -> &str {
+    let full_meta_block = Regex::new(r"<center>[\s\S]+?</center>")
+        .expect("Regex for full meta block invalid")
+        .find_iter(page)
+        .nth(1)
+        .expect("Could not find meta block")
+        .as_str();
+    Regex::new(r"<center>\s*(?P<content>\S[\s\S]+?\S)\s*</center>")
+        .expect("Regex for meta block content invalid")
+        .captures(full_meta_block)
+        .expect("Could not find meta block content")
+        .name("content")
+        .expect("Could not get meta block content")
+        .as_str()
+}
+
+fn get_additional_meta_block(page: &str) -> &str {
+    let meta_block = get_meta_block(page);
+    Regex::new(r"<[^>]+?>[\s\S]+?</[^>]+?>\s*(?:<br>)?\s*(?P<amb>[\s\S]+)")
+        .expect("Regex for additional meta block invalid")
+        .captures(meta_block)
+        .expect("Could not find additional meta block content")
+        .name("amb")
+        .expect("Could not get meta block content")
+        .as_str()
+}
+
+fn get_title(page: &str, url_root: &str) -> String {
+    let meta_block = get_meta_block(page);
+    let regex =
+        Regex::new(r"<[^>]+?>\s*(\S[\s\S]+?\S)\s*</[^>]+?>").expect("Regex for title invalid");
+    let raw_title = regex
+        .find_iter(meta_block)
+        .nth(0)
+        .expect("Could not find title")
+        .as_str();
+    normalize_text(raw_title, url_root).replace("*", "")
+}
+
+fn get_meta(page: &str, url_root: &str) -> String {
+    normalize_text(get_additional_meta_block(page), url_root).replace("*", "")
 }
 
 fn normalize_text(text: &str, url_root: &str) -> String {
@@ -418,12 +397,8 @@ async fn main() -> () {
                 date DATE NOT NULL,
                 img_url VARCHAR(2048) NOT NULL,
                 title TEXT NOT NULL,
-                credit TEXT NOT NULL,
                 description TEXT NOT NULL,
-                img_editor TEXT,
-                text_author TEXT,
-                copyright TEXT,
-                license TEXT
+                meta TEXT NOT NULL
             );",
             &[],
         )
@@ -446,16 +421,12 @@ async fn main() -> () {
         };
         println!(
             // "Date: {}, Image URL: {}, Title: {}, Description: {}, Credit: {}, Image editor: {}, Text author: {}, Copyright: {}, License: {}",
-            "Date: {}, Image URL: {}, Title: {}",
+            "Date: {}, Image URL: {}, Title: {}\n    Meta: {}",
             apod.date,
             apod.img_url,
             apod.title,
+            apod.meta,
             // apod.description,
-            // apod.credit,
-            // apod.img_editor,
-            // apod.text_author,
-            // apod.copyright,
-            // apod.license,
         );
         // apod.save(client).await.unwrap();
 
