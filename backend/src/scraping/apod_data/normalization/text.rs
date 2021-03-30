@@ -23,13 +23,13 @@ pub fn normalize_text(text: &str) -> String {
     .unwrap()
     .replace_all(&non_content_moved_before, "$1$3$2");
 
-  // let tag_colon_order_fixed = Regex::new(r"(?P<c_tag></[^>]+?>):")
-  //   .unwrap()
-  //   .replace_all(&space_in_tags_removed, ":${c_tag}");
+  let tag_colon_order_fixed = Regex::new(r"(?P<c_tag></[ib]>):")
+    .unwrap()
+    .replace_all(&non_content_moved_after, ":${c_tag}");
 
   let multiple_spaces_fixed = Regex::new(r" {2,}")
     .unwrap()
-    .replace_all(&non_content_moved_after, " ");
+    .replace_all(&tag_colon_order_fixed, " ");
 
   let multiple_new_line_fixed = Regex::new(r"\n{3,}")
     .unwrap()
@@ -277,5 +277,13 @@ mod tests {
   #[test]
   fn merges_multiple_new_lines_into_max_two() {
     assert_eq!(normalize_text("Some\n\n\n\nnew lines"), "Some\n\nnew lines");
+  }
+
+  #[test]
+  fn moves_colon_into_ib() {
+    assert_eq!(
+      normalize_text("Some <i>Text</i>: Here"),
+      "Some <i>Text:</i> Here"
+    )
   }
 }
