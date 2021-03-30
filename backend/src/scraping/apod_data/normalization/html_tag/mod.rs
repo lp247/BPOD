@@ -21,9 +21,8 @@ pub fn normalize_html_tag(tag: &str) -> String {
 
   let is_closing_tag = tag.contains("/");
   if is_closing_tag {
-    let tag_without_slash = tag.replace("/", "");
-    let tag_content_without_slash = &tag_without_slash[1..tag_without_slash.len() - 1];
-    return format!("</{}>", &tag_content_without_slash);
+    let tag_name = Regex::new(r"[^a-z]").unwrap().replace_all(tag, "");
+    return format!("</{}>", &tag_name);
   }
 
   String::from(tag.to_lowercase())
