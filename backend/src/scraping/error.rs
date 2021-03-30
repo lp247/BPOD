@@ -4,27 +4,27 @@ pub type ScrapeResult<T> = std::result::Result<T, ScrapeError>;
 
 #[derive(Debug, Clone)]
 pub enum ScrapeError {
-  NotFound,
   Parsing,
   ResourceUnsupported,
   Dummy,
   FileSystem,
   Image,
   HTMLFixing(String),
-  Network
+  Network,
 }
 
 impl Display for ScrapeError {
   fn fmt(&self, f: &mut Formatter) -> FmtResult {
-    let text = match self {
-      NotFound => "ScrapeError: Not found",
-      Parsing => "ScrapeError: Parsing",
-      ResourceUnsupported => "ScrapeError: Resource unsupported",
-      Dummy => "ScrapeError: Dummy",
-      FileSystem => "ScrapeError: File system",
-      Image => "ScrapeError: Image",
-      HTMLFixing => "ScrapeError: HTML fixing",
-    };
-    write!(f, "{}", text)
+    match &*self {
+      ScrapeError::Parsing => write!(f, "Parsing failed"),
+      ScrapeError::ResourceUnsupported => write!(f, "The resource is unsupported"),
+      ScrapeError::Dummy => write!(f, "THIS ERROR SHOULD NOT BE THROWN"),
+      ScrapeError::FileSystem => write!(f, "Could not save or load file"),
+      ScrapeError::Image => write!(f, "Could not load image"),
+      ScrapeError::HTMLFixing(err_string) => {
+        write!(f, "HTML fixing was unsuccessful ({})", err_string)
+      }
+      ScrapeError::Network => write!(f, "The network resource could not be retrieved"),
+    }
   }
 }
