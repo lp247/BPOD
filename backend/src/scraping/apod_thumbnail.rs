@@ -4,9 +4,9 @@ use crate::APODRequestClient;
 use image::load_from_memory;
 use regex::Regex;
 use reqwest::Response;
-use std::{path::Path};
+use std::path::Path;
 
-async fn get_apod_thumbnail(apod: &APOD, client: &APODRequestClient) -> ScrapeResult<()> {
+pub async fn get_apod_thumbnail(apod: &APOD, client: &APODRequestClient) -> ScrapeResult<()> {
   let image_url = if apod.img_url.starts_with("https://www.youtube.com/embed") {
     Regex::new(r#"https://www.youtube.com/embed/(.+?)(?:\?.*|$)"#)
       .map(|re| match re.captures(&apod.img_url) {
