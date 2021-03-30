@@ -33,7 +33,11 @@ pub fn normalize_text(text: &str) -> String {
     .unwrap()
     .replace_all(&tag_colon_order_fixed, " ");
 
-  let trimmed = multiple_spaces_fixed.trim();
+  let spaces_around_br_removed = Regex::new(r"\s?<br>\s?")
+    .unwrap()
+    .replace_all(&multiple_spaces_fixed, "<br>");
+
+  let trimmed = spaces_around_br_removed.trim();
 
   match check_html(trimmed) {
     Err(ScrapeError::HTMLFixing(err_message)) => {
@@ -152,7 +156,7 @@ mod tests {
     );
     assert_eq!(
       normalize_text("The <a href=\"https://en.wikipedia.org/wiki/Antikythera_mechanism\"\n>Antikythera mechanism</a>, pictured, is now widely regarded as the \n<a href=\"https://en.wikipedia.org/wiki/Computer#Pre-20th_century\"\n>first</a> <a href=\n\"https://www.smithsonianmag.com/history/decoding-antikythera-mechanism-first-computer-180953979/\"\n>computer</a>."),
-      "The <a href=\"https://en.wikipedia.org/wiki/Antikythera_mechanism\">Antikythera mechanism</a>, pictured, is now widely regarded as the \n<a href=\"https://en.wikipedia.org/wiki/Computer#Pre-20th_century\">first</a> <a href=\"https://www.smithsonianmag.com/history/decoding-antikythera-mechanism-first-computer-180953979/\">computer</a>."
+      "The <a href=\"https://en.wikipedia.org/wiki/Antikythera_mechanism\">Antikythera mechanism</a>, pictured, is now widely regarded as the <a href=\"https://en.wikipedia.org/wiki/Computer#Pre-20th_century\">first</a> <a href=\"https://www.smithsonianmag.com/history/decoding-antikythera-mechanism-first-computer-180953979/\">computer</a>."
     );
     assert_eq!(
       normalize_text("<a href=\"https://www.eso.org/public/\">ESO</a>/<a\nhref=\"https://www.eso.org/public/teles-instr/lasilla/mpg22/wfi/\">WFI</a> (visible);"),
@@ -270,11 +274,6 @@ mod tests {
       normalize_text(r#"Here is <a href="www.google.de">Link</a> Text"#),
       r#"Here is <a href="www.google.de">Link</a> Text"#
     );
-  }
-
-  #[test]
-  fn merges_multiple_new_lines_into_max_two() {
-    assert_eq!(normalize_text("Some\n\n\n\nnew lines"), "Some\n\nnew lines");
   }
 
   #[test]
