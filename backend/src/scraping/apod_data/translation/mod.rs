@@ -1,47 +1,40 @@
 use regex::{Captures, Regex};
 
 pub fn html_to_markdown(html: &str) -> String {
-  let br_translated: String = html.replace("<br>", "\n");
+  let br_translated = Regex::new(r" ?<br> ?").unwrap().replace_all(html, "");
 
-  let center_removed: String = Regex::new(r#"<center>(?P<content>[\s\S]+?)</center>"#)
+  let center_removed = Regex::new(r#"<center>(?P<content>[\s\S]+?)</center>"#)
     .unwrap()
-    .replace_all(br_translated.as_str(), "$content")
-    .into_owned();
+    .replace_all(&br_translated, "$content");
 
-  let italic_translated: String = Regex::new(r#"<i>(?P<content>[\s\S]+?)</i>"#)
+  let italic_translated = Regex::new(r#"<i>(?P<content>[\s\S]+?)</i>"#)
     .unwrap()
-    .replace_all(center_removed.as_str(), "**$content**")
-    .into_owned();
+    .replace_all(&center_removed, "**$content**");
 
-  let bold_translated: String = Regex::new(r#"<b>(?P<content>[\s\S]+?)</b>"#)
+  let bold_translated = Regex::new(r#"<b>(?P<content>[\s\S]+?)</b>"#)
     .unwrap()
-    .replace_all(italic_translated.as_str(), "*$content*")
-    .into_owned();
+    .replace_all(&italic_translated, "*$content*");
 
-  let links_translated: String = Regex::new(r#"<a href="(?P<url>.+?)">(?P<text>[\s\S]+?)</a>"#)
+  let links_translated = Regex::new(r#"<a href="(?P<url>.+?)">(?P<text>[\s\S]+?)</a>"#)
     .unwrap()
-    .replace_all(bold_translated.as_str(), |captures: &Captures| {
+    .replace_all(&bold_translated, |captures: &Captures| {
       let url = captures.name("url").unwrap().as_str();
       let text = captures.name("text").unwrap().as_str();
       format!("[{}]({})", text, url)
-    })
-    .into_owned();
+    });
 
-  let artifacts_removed: String = Regex::new(r#"\s?(?:</a>|</b>)\s?"#)
-    .unwrap()
-    .replace_all(
-      links_translated.as_str(),
-      |captures: &regex::Captures| match captures
-        .get(0)
-        .expect("Could not get artifact")
-        .as_str()
-        .contains(" ")
-      {
-        true => " ",
-        false => "",
-      },
-    )
-    .into_owned();
+  let artifacts_removed = Regex::new(r#"\s?(?:</a>|</b>)\s?"#).unwrap().replace_all(
+    &links_translated,
+    |captures: &regex::Captures| match captures
+      .get(0)
+      .expect("Could not get artifact")
+      .as_str()
+      .contains(" ")
+    {
+      true => " ",
+      false => "",
+    },
+  );
 
   let trimmed = artifacts_removed.trim();
 
