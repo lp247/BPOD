@@ -23,7 +23,7 @@ pub fn normalize_text(text: &str) -> String {
     .unwrap()
     .replace_all(&non_content_moved_before, "$1$3$2");
 
-  let tag_colon_order_fixed = Regex::new(r"(?P<c_tag></[ib]>):")
+  let tag_colon_order_fixed = Regex::new(r"(?P<c_tag></[ib]>)\s?:")
     .unwrap()
     .replace_all(&non_content_moved_after, ":${c_tag}");
 
