@@ -6,7 +6,6 @@ pub type ScrapeResult<T> = std::result::Result<T, ScrapeError>;
 pub enum ScrapeError {
   Parsing,
   ResourceUnsupported,
-  Dummy,
   FileSystem,
   Image,
   HTMLFixing(String),
@@ -18,7 +17,6 @@ impl Display for ScrapeError {
     match &*self {
       ScrapeError::Parsing => write!(f, "Parsing failed"),
       ScrapeError::ResourceUnsupported => write!(f, "The resource is unsupported"),
-      ScrapeError::Dummy => write!(f, "THIS ERROR SHOULD NOT BE THROWN"),
       ScrapeError::FileSystem => write!(f, "Could not save or load file"),
       ScrapeError::Image => write!(f, "Could not load image"),
       ScrapeError::HTMLFixing(err_string) => {

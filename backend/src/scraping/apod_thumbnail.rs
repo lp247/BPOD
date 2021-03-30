@@ -47,5 +47,5 @@ pub async fn get_apod_thumbnail(apod: &APOD, client: &APODRequestClient) -> Scra
     let wait_time = time::Duration::from_secs((attempt + 1) * 2);
     thread::sleep(wait_time);
   }
-  return Err(ScrapeError::Dummy);
+  return Err(ScrapeError::Network);
 }
