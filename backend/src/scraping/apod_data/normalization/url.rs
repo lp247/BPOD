@@ -1,8 +1,7 @@
 use regex::Regex;
 
 pub fn normalize_url(url: &str) -> String {
-  let url_without_new_line = url.replace("\n", "");
-  let url_without_space = url_without_new_line.replace(" ", "");
+  let url_without_space = url.replace("\n", "").replace(" ", "").replace("\t", "");
   let top_level_domain = r"[a-zA-Z]{2,}";
   let domain_label = r"(?:[a-zA-Z0-9][a-zA-Z0-9\-]+?[a-zA-Z0-9]|[a-zA-Z0-9]{1,2})";
   if url_without_space.starts_with("mailto:") {
