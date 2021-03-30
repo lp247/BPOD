@@ -4,9 +4,9 @@ use crate::APODRequestClient;
 use image::load_from_memory;
 use regex::Regex;
 use reqwest::Response;
-use std::{path::Path, thread, time};
+use std::{path::Path};
 
-async fn get_apod_thumbnail_once(apod: &APOD, client: &APODRequestClient) -> ScrapeResult<()> {
+async fn get_apod_thumbnail(apod: &APOD, client: &APODRequestClient) -> ScrapeResult<()> {
   let image_url = if apod.img_url.starts_with("https://www.youtube.com/embed") {
     Regex::new(r#"https://www.youtube.com/embed/(.+?)(?:\?.*|$)"#)
       .map(|re| match re.captures(&apod.img_url) {
@@ -36,16 +36,4 @@ async fn get_apod_thumbnail_once(apod: &APOD, client: &APODRequestClient) -> Scr
     .map_err(|_| ScrapeError::FileSystem)?;
 
   Ok(())
-}
-
-pub async fn get_apod_thumbnail(apod: &APOD, client: &APODRequestClient) -> ScrapeResult<()> {
-  let num_attempts: u64 = 5;
-  for attempt in 0..num_attempts {
-    if get_apod_thumbnail_once(&apod, &client).await.is_ok() {
-      return Ok(());
-    }
-    let wait_time = time::Duration::from_secs((attempt + 1) * 2);
-    thread::sleep(wait_time);
-  }
-  return Err(ScrapeError::Network);
 }
