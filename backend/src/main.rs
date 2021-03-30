@@ -7,7 +7,7 @@ use reqwest::{
   header::{HeaderMap, HeaderValue},
   Client, Response,
 };
-use scraping::{get_apod_data, get_apod_thumbnail, ScrapeResult};
+use scraping::{get_apod_data, get_apod_thumbnail, ScrapeError, ScrapeResult};
 use std::{thread, time};
 use tokio_postgres::NoTls;
 
@@ -37,7 +37,7 @@ impl APODRequestClient {
       .unwrap();
     APODRequestClient { client }
   }
-  async fn get(&self, url: &str) -> Response {
+  async fn get(&self, url: &str) -> ScrapeResult<Response> {
     let host = Regex::new("://(.+?)[/$]")
       .unwrap()
       .captures(url)
@@ -45,13 +45,18 @@ impl APODRequestClient {
       .get(1)
       .expect("Could not find host")
       .as_str();
-    self
-      .client
-      .get(url)
-      .header("Host", host)
-      .send()
-      .await
-      .expect("Could not get resource")
+
+    let num_attempts: u64 = 5;
+    for attempt in 0..num_attempts {
+      let configured_get_request = self.client.get(url).header("Host", host);
+      let response = configured_get_request.send().await;
+      if response.is_ok() {
+        return Ok(response.unwrap());
+      }
+      let wait_time = time::Duration::from_secs((attempt + 1) * 2);
+      thread::sleep(wait_time);
+    }
+    return Err(ScrapeError::Network);
   }
 }
 

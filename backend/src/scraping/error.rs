@@ -11,6 +11,7 @@ pub enum ScrapeError {
   FileSystem,
   Image,
   HTMLFixing(String),
+  Network
 }
 
 impl Display for ScrapeError {

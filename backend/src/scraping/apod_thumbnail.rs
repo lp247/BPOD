@@ -23,7 +23,7 @@ async fn get_apod_thumbnail_once(apod: &APOD, client: &APODRequestClient) -> Scr
     return Err(ScrapeError::ResourceUnsupported);
   };
 
-  let response: Response = client.get(&image_url).await;
+  let response: Response = client.get(&image_url).await?;
   let img_bytes = response.bytes().await.map_err(|_| ScrapeError::Parsing)?;
   let img = load_from_memory(&img_bytes).map_err(|_| ScrapeError::Image)?;
   let thumbnail = img.resize_to_fill(250, 250, image::imageops::CatmullRom);

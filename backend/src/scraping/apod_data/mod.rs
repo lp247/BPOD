@@ -12,7 +12,7 @@ pub async fn get_apod_data(date: &str, client: &APODRequestClient) -> ScrapeResu
   let month = &date[5..7];
   let day = &date[8..10];
   let url = format!("https://apod.nasa.gov/apod/ap{}{}{}.html", year, month, day);
-  let page_response = client.get(&url).await;
+  let page_response = client.get(&url).await?;
   if page_response.status().as_u16() == 404 {
     return Ok(None);
   }
