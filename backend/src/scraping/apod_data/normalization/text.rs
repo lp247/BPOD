@@ -4,9 +4,11 @@ use regex::{Captures, Regex};
 
 pub fn normalize_text(text: &str) -> String {
   // TODO: Fix &ccedil; &oacute; &eacute; &aacute; &amp; &oslash;
+  let new_lines_removed = Regex::new(r"\n+").unwrap().replace_all(text, " ");
+
   let tags_fixed = Regex::new(r"<[^>]+?>")
     .unwrap()
-    .replace_all(text, |captures: &Captures| {
+    .replace_all(&new_lines_removed, |captures: &Captures| {
       normalize_html_tag(captures.get(0).unwrap().as_str())
     });
 
@@ -31,11 +33,7 @@ pub fn normalize_text(text: &str) -> String {
     .unwrap()
     .replace_all(&tag_colon_order_fixed, " ");
 
-  let multiple_new_line_fixed = Regex::new(r"\n{3,}")
-    .unwrap()
-    .replace_all(&multiple_spaces_fixed, "\n\n");
-
-  let trimmed = multiple_new_line_fixed.trim();
+  let trimmed = multiple_spaces_fixed.trim();
 
   match check_html(trimmed) {
     Err(ScrapeError::HTMLFixing(err_message)) => {
