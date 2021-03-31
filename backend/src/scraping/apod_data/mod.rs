@@ -18,10 +18,10 @@ pub async fn get_apod_data(date: &str, client: &APODRequestClient) -> ScrapeResu
   }
   let page = page_response.text().await.expect("Could not get text");
 
-  let description = get_description(&page);
+  let description = get_description(&page)?;
   let img_url = get_img_url(&page);
-  let title = get_title(&page);
-  let meta = get_meta(&page);
+  let title = get_title(&page)?;
+  let meta = get_meta(&page)?;
 
   Ok(Some(APOD {
     id: None,

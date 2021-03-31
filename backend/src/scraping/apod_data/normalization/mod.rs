@@ -1,4 +1,3 @@
-mod html_tag;
 mod text;
 mod url;
 

@@ -1,9 +1,10 @@
 use super::super::normalization::normalize_text;
 use super::super::translation::html_to_markdown;
 use super::utils::get_title_meta_block;
+use crate::scraping::ScrapeResult;
 use regex::Regex;
 
-pub fn get_meta(page: &str) -> String {
+pub fn get_meta(page: &str) -> ScrapeResult<String> {
   let title_meta_block = get_title_meta_block(page);
   let meta_block = Regex::new(r"<[^>]+?>[\s\S]+?</[^>]+?>\s*(?:<br>)?\s*(?P<amb>[\s\S]+)")
     .expect("Regex for additional meta block invalid")
@@ -12,5 +13,6 @@ pub fn get_meta(page: &str) -> String {
     .name("amb")
     .expect("Could not get meta block content")
     .as_str();
-  html_to_markdown(&normalize_text(meta_block).replace("*", ""))
+  let normalized_meta = normalize_text(meta_block)?;
+  Ok(html_to_markdown(&normalized_meta).replace("*", ""))
 }
