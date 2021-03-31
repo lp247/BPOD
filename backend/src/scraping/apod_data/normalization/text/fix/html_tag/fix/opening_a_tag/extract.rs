@@ -31,5 +31,6 @@ mod tests {
     );
     assert_eq!(extract_url("<a href=\"www.google.de>\">"), "www.google.de>");
     assert_eq!(extract_url("<a href=\"www.google.de\" >"), "www.google.de");
+    assert_eq!(extract_url("<a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a>"), "image/1905/TotnBefore_Dai_3000.jpg");
   }
 }

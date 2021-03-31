@@ -38,5 +38,9 @@ mod tests {
       "Text <?=/a> Text",
       &["<?=/a>"],
     );
+    helper(
+      "Text <a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a> Text",
+      &["<a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a>"],
+    );
   }
 }
