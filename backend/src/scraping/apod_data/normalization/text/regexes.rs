@@ -34,5 +34,9 @@ mod tests {
       "Text <a href=\"www.google.de\" >Link</a> Text",
       &["<a href=\"www.google.de\" >", "</a>"],
     );
+    helper(
+      "Text <?=/a> Text",
+      &["<?=/a>"],
+    );
   }
 }

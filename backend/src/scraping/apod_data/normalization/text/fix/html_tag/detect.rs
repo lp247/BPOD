@@ -20,7 +20,7 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
   }
 
   let tag_includes_slash = tag.contains("/");
-  let tag_name = Regex::new(r"[<>/ ]")
+  let tag_name = Regex::new(r"[^a-zA-Z]")
     .unwrap()
     .replace_all(tag, "")
     .to_lowercase();
@@ -152,5 +152,6 @@ mod tests {
     assert_eq!(detect_tag("</A>").unwrap() == Tag::ClosingA, true);
     assert_eq!(detect_tag("<a/>").unwrap() == Tag::ClosingA, true);
     assert_eq!(detect_tag("<A/>").unwrap() == Tag::ClosingA, true);
+    assert_eq!(detect_tag("<?=/a>").unwrap() == Tag::ClosingA, true);
   }
 }
