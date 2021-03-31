@@ -50,5 +50,9 @@ mod tests {
       "Text <p>Content</p> Text",
       &["<p>", "</p>"],
     );
+    helper(
+      "Text <a h ref=\"www.google.de\"> Text",
+      &["<a h ref=\"www.google.de\">"],
+    );
   }
 }
