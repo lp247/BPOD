@@ -108,15 +108,42 @@ mod tests {
 
   #[test]
   fn detects_opening_a_tags() {
-    assert_eq!(detect_tag("<a href=\"www.google.de\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<ahref=\"www.google.de\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<a hrf=\"www.google.de\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<a HREF=\"www.google.de\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<A href=\"www.google.de\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<a href=www.google.de>").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<a hef=\"www.google.de\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<a href=\"www.google.de>\">").unwrap() == Tag::OpeningA, true);
-    assert_eq!(detect_tag("<a href=\"www.google.de\" >").unwrap() == Tag::OpeningA, true);
+    assert_eq!(
+      detect_tag("<a href=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<ahref=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<a hrf=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<a HREF=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<A href=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<a href=www.google.de>").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<a hef=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<a href=\"www.google.de>\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<a href=\"www.google.de\" >").unwrap() == Tag::OpeningA,
+      true
+    );
   }
 
   #[test]
