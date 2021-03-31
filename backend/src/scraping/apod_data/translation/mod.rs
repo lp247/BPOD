@@ -23,7 +23,8 @@ pub fn html_to_markdown(html: &str) -> String {
       format!("[{}]({})", text, url)
     });
 
-  let artifacts_removed = Regex::new(r#"\s?(?:</a>|</b>)\s?"#).unwrap().replace_all(
+  // TODO: move artifacts clean up and trim into text normalization
+  let artifacts_removed = Regex::new(r#"\s?(?:</a>|</b>|</p>)\s?"#).unwrap().replace_all(
     &links_translated,
     |captures: &regex::Captures| match captures
       .get(0)
