@@ -105,7 +105,7 @@ async fn main() -> () {
         counter = counter - chrono::Duration::days(1);
         continue;
       }
-      Err(err) => panic!(err),
+      Err(err) => panic!("{}", err),
     };
 
     match get_apod_thumbnail(&apod, &reqwest_client).await {
