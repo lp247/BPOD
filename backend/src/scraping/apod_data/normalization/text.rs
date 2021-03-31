@@ -6,7 +6,7 @@ pub fn normalize_text(text: &str) -> String {
   // TODO: Fix &ccedil; &oacute; &eacute; &aacute; &amp; &oslash;
   let new_lines_removed = Regex::new(r"\n+").unwrap().replace_all(text, " ");
 
-  let tags_fixed = Regex::new(r"<[^>]+?>")
+  let tags_fixed = Regex::new(r#"<(?:[^"]|".+?")+?>"#)
     .unwrap()
     .replace_all(&new_lines_removed, |captures: &Captures| {
       normalize_html_tag(captures.get(0).unwrap().as_str())
