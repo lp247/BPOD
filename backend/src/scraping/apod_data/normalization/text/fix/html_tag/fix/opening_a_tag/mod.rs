@@ -1,16 +1,9 @@
-mod regexes;
+mod extract;
 
 use super::super::super::super::super::normalize_url;
-use regex::Regex;
-use regexes::LINK;
+use extract::extract_url;
 
 pub fn fix_opening_a_tag(tag: &str) -> String {
-  let url = Regex::new(&LINK)
-    .unwrap()
-    .captures(tag)
-    .unwrap()
-    .name("url")
-    .unwrap()
-    .as_str();
+  let url = extract_url(tag);
   format!(r#"<a href="{}">"#, normalize_url(url))
 }
