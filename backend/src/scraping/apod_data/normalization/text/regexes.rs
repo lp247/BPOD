@@ -46,5 +46,9 @@ mod tests {
       "Text <a href=\"\"> Text",
       &["<a href=\"\">"],
     );
+    helper(
+      "Text <p>Content</p> Text",
+      &["<p>", "</p>"],
+    );
   }
 }

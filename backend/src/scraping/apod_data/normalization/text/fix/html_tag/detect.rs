@@ -12,6 +12,8 @@ pub enum Tag {
   ClosingI,
   OpeningCenter,
   ClosingCenter,
+  OpeningP,
+  ClosingP,
 }
 
 pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
@@ -32,6 +34,7 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "b" => Ok(Tag::ClosingB),
       "a" => Ok(Tag::ClosingA),
       "center" => Ok(Tag::ClosingCenter),
+      "p" => Ok(Tag::ClosingP),
       _ => Err(ScrapeError::HTMLFixing(format!(
         "Could not detect tag {}",
         tag
@@ -43,6 +46,7 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "i" => Ok(Tag::OpeningI),
       "b" => Ok(Tag::OpeningB),
       "center" => Ok(Tag::OpeningCenter),
+      "p" => Ok(Tag::OpeningP),
       _ => Err(ScrapeError::HTMLFixing(format!(
         "Could not detect tag {}",
         tag
@@ -161,5 +165,19 @@ mod tests {
     assert_eq!(detect_tag("<a/>").unwrap() == Tag::ClosingA, true);
     assert_eq!(detect_tag("<A/>").unwrap() == Tag::ClosingA, true);
     assert_eq!(detect_tag("<?=/a>").unwrap() == Tag::ClosingA, true);
+  }
+
+  #[test]
+  fn detects_opening_p_tags() {
+    assert_eq!(detect_tag("<p>").unwrap() == Tag::OpeningP, true);
+    assert_eq!(detect_tag("<P>").unwrap() == Tag::OpeningP, true);
+  }
+
+  #[test]
+  fn detects_closing_p_tags() {
+    assert_eq!(detect_tag("</p>").unwrap() == Tag::ClosingP, true);
+    assert_eq!(detect_tag("</P>").unwrap() == Tag::ClosingP, true);
+    assert_eq!(detect_tag("<p/>").unwrap() == Tag::ClosingP, true);
+    assert_eq!(detect_tag("<P/>").unwrap() == Tag::ClosingP, true);
   }
 }

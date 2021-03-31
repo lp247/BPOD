@@ -14,5 +14,7 @@ pub fn fix_tag(tag: &str, tag_type: &Tag) -> String {
     Tag::ClosingA => String::from("</a>"),
     Tag::OpeningCenter => String::from("<center>"),
     Tag::ClosingCenter => String::from("</center>"),
+    Tag::OpeningP => String::from("<p>"),
+    Tag::ClosingP => String::from("</p>"),
   }
 }
