@@ -32,8 +32,9 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "b" => Ok(Tag::ClosingB),
       "a" => Ok(Tag::ClosingA),
       "center" => Ok(Tag::ClosingCenter),
-      _ => Err(ScrapeError::HTMLFixing(String::from(
-        "Could not detect tag",
+      _ => Err(ScrapeError::HTMLFixing(format!(
+        "Could not detect tag {}",
+        tag
       ))),
     }
   } else {
@@ -42,8 +43,9 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "i" => Ok(Tag::OpeningI),
       "b" => Ok(Tag::OpeningB),
       "center" => Ok(Tag::OpeningCenter),
-      _ => Err(ScrapeError::HTMLFixing(String::from(
-        "Could not detect tag",
+      _ => Err(ScrapeError::HTMLFixing(format!(
+        "Could not detect tag {}",
+        tag
       ))),
     }
   }
