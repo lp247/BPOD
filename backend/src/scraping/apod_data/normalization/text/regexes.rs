@@ -1,4 +1,4 @@
-pub const TAG_REGEX: &str = r#"<(?:[^"]|".+?")+?>"#;
+pub const TAG_REGEX: &str = r#"<(?:[^"]|".*?")+?>"#;
 
 #[cfg(test)]
 mod tests {
@@ -41,6 +41,10 @@ mod tests {
     helper(
       "Text <a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a> Text",
       &["<a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a>"],
+    );
+    helper(
+      "Text <a href=\"\"> Text",
+      &["<a href=\"\">"],
     );
   }
 }
