@@ -2,6 +2,7 @@ use crate::scraping::{ScrapeError, ScrapeResult};
 use regex::Regex;
 
 pub fn check_html(html: &str) -> ScrapeResult<()> {
+  // TODO check matching closing tags
   check_empty_start_of_text(html)?;
   check_empty_end_of_text(html)?;
   check_colon_style_tag_order(html)?;
