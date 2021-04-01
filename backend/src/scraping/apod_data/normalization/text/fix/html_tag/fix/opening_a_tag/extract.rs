@@ -1,7 +1,7 @@
 use regex::Regex;
 
 pub fn extract_url(tag: &str) -> &str {
-  Regex::new(r#"<[aA]\s*(?:ref|href|rhef|hre|hef|hrf|HREF|h ref)\s*=\s*"?(?P<url>[\S\s]*?)(?:>$|"[\S\s]*>$|"</a>$)"#)
+  Regex::new(r#"<[aA]\s*(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff)\s*=\s*"?(?P<url>[\S\s]*?)(?:>$|"[\S\s]*>$|"</a>$)"#)
     .unwrap()
     .captures(tag)
     .unwrap()
@@ -34,5 +34,6 @@ mod tests {
     assert_eq!(extract_url("<a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a>"), "image/1905/TotnBefore_Dai_3000.jpg");
     assert_eq!(extract_url("<a href=\"\">"), "");
     assert_eq!(extract_url("<a h ref=\"www.google.de\">"), "www.google.de");
+    assert_eq!(extract_url("<a hreff=\"www.google.de\">"), "www.google.de");
   }
 }
