@@ -1,7 +1,18 @@
 use regex::Regex;
 
 pub fn extract_url(tag: &str) -> &str {
-  Regex::new(r#"<[aA]\s*(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff)\s*=\s*"?(?P<url>[\S\s]*?)(?:>$|"[\S\s]*>$|"</a>$)"#)
+  let href_attr_regex_str = r"(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff)";
+  let url_regex_str = r"(?P<url>[\S\s]*?)";
+  let end_regex_str = r#"(?:>$|"[\S\s]*>$|"</a>$)"#;
+  let href_url_con_regex_str = r#"(?:\s*=\s*"|=|")"#;
+  let link_opening_tag_regex_str = format!(
+    r#"<[aA]\s*{href_attr}{href_url_con}{url}{end}"#,
+    href_attr = href_attr_regex_str,
+    href_url_con = href_url_con_regex_str,
+    url = url_regex_str,
+    end = end_regex_str
+  );
+  Regex::new(link_opening_tag_regex_str.as_str())
     .unwrap()
     .captures(tag)
     .unwrap()
@@ -31,10 +42,19 @@ mod tests {
     );
     assert_eq!(extract_url("<a href=\"www.google.de>\">"), "www.google.de>");
     assert_eq!(extract_url("<a href=\"www.google.de\" >"), "www.google.de");
-    assert_eq!(extract_url("<a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a>"), "image/1905/TotnBefore_Dai_3000.jpg");
+    assert_eq!(
+      extract_url("<a href=\"www.google.de\"</a>"),
+      "www.google.de"
+    );
     assert_eq!(extract_url("<a href=\"\">"), "");
     assert_eq!(extract_url("<a h ref=\"www.google.de\">"), "www.google.de");
     assert_eq!(extract_url("<a hreff=\"www.google.de\">"), "www.google.de");
-    assert_eq!(extract_url("<a href=http://www.google.de\">"), "http://www.google.de");
+    assert_eq!(
+      extract_url("<a href\"http://www.google.de\">"),
+      "http://www.google.de"
+    );
+    assert_eq!(extract_url("<a href =\"www.google.de\">"), "www.google.de");
+    assert_eq!(extract_url("<a href= \"www.google.de\">"), "www.google.de");
+    assert_eq!(extract_url("<a href = \"www.google.de\">"), "www.google.de");
   }
 }
