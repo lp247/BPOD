@@ -160,10 +160,7 @@ mod tests {
       detect_tag("<a href=\"image/1905/TotnBefore_Dai_3000.jpg\"</a>").unwrap() == Tag::OpeningA,
       true
     );
-    assert_eq!(
-      detect_tag("<a href=\"\">").unwrap() == Tag::OpeningA,
-      true
-    );
+    assert_eq!(detect_tag("<a href=\"\">").unwrap() == Tag::OpeningA, true);
     assert_eq!(
       detect_tag("<a h ref=\"www.google.de\">").unwrap() == Tag::OpeningA,
       true
