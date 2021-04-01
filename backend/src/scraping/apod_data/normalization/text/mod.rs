@@ -10,6 +10,7 @@ use regexes::TAG_REGEX;
 
 pub fn normalize_text(text: &str, remove_formatting_tags: bool) -> ScrapeResult<String> {
   // TODO: Fix &ccedil; &oacute; &eacute; &aacute; &amp; &oslash;
+  // TODO: Move fixes into own functions and test them - remove tests then here
   let new_lines_removed = Regex::new(r"\n+").unwrap().replace_all(text, " ");
 
   let tags_fixed = replace_matches(&new_lines_removed, TAG_REGEX, normalize_html_tag)?;
@@ -50,7 +51,7 @@ pub fn normalize_text(text: &str, remove_formatting_tags: bool) -> ScrapeResult<
 
   if remove_formatting_tags {
     Ok(
-      Regex::new("(?:<i>|</i>|<b>|</b>")
+      Regex::new("(?:<i>|</i>|<b>|</b>)")
         .unwrap()
         .replace_all(trimmed, "")
         .into_owned(),

@@ -11,6 +11,9 @@ use scraping::{get_apod_data, get_apod_thumbnail, ScrapeError, ScrapeResult};
 use std::{thread, time};
 use tokio_postgres::NoTls;
 
+// TODO: Move APODRequestClient into own file/module
+// TODO: Rework module structure
+
 pub struct APODRequestClient {
   client: Client,
 }
