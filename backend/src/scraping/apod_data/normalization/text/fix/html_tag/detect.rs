@@ -51,6 +51,9 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "br" => Ok(Tag::Br),
       "i" => Ok(Tag::OpeningI),
       "b" => Ok(Tag::OpeningB),
+      // <a> tag without slash is more likely a closing tag with missing slash
+      // than an opening tag with missing href attribute.
+      "a" => Ok(Tag::ClosingA),
       "center" => Ok(Tag::OpeningCenter),
       "p" => Ok(Tag::OpeningP),
       "sub" => Ok(Tag::OpeningSub),
