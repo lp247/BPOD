@@ -1,4 +1,4 @@
-pub const TAG_REGEX: &str = r#"<(?:[^"]|".*?")+?>"#;
+pub const TAG_REGEX: &str = r#"<(?:[^"]|".*?")+?"?>"#;
 
 #[cfg(test)]
 mod tests {
@@ -53,6 +53,10 @@ mod tests {
     helper(
       "Text <a h ref=\"www.google.de\"> Text",
       &["<a h ref=\"www.google.de\">"],
+    );
+    helper(
+      "Text <a href=www.google.de\"> Text",
+      &["<a href=www.google.de\">"],
     );
   }
 }

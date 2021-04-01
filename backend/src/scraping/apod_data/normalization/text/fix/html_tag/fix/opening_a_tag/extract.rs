@@ -35,5 +35,6 @@ mod tests {
     assert_eq!(extract_url("<a href=\"\">"), "");
     assert_eq!(extract_url("<a h ref=\"www.google.de\">"), "www.google.de");
     assert_eq!(extract_url("<a hreff=\"www.google.de\">"), "www.google.de");
+    assert_eq!(extract_url("<a href=http://www.google.de\">"), "http://www.google.de");
   }
 }
