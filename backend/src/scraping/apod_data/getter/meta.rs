@@ -1,5 +1,4 @@
 use super::super::normalization::normalize_text;
-use super::super::translation::html_to_markdown;
 use super::utils::get_title_meta_block;
 use crate::scraping::ScrapeResult;
 use regex::Regex;
@@ -13,6 +12,5 @@ pub fn get_meta(page: &str) -> ScrapeResult<String> {
     .name("amb")
     .expect("Could not get meta block content")
     .as_str();
-  let normalized_meta = normalize_text(meta_block)?;
-  Ok(html_to_markdown(&normalized_meta).replace("*", ""))
+  normalize_text(meta_block, true)
 }

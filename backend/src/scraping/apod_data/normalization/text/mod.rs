@@ -8,7 +8,7 @@ use fix::{normalize_html_tag, replace_matches};
 use regex::Regex;
 use regexes::TAG_REGEX;
 
-pub fn normalize_text(text: &str) -> ScrapeResult<String> {
+pub fn normalize_text(text: &str, remove_formatting_tags: bool) -> ScrapeResult<String> {
   // TODO: Fix &ccedil; &oacute; &eacute; &aacute; &amp; &oslash;
   let new_lines_removed = Regex::new(r"\n+").unwrap().replace_all(text, " ");
 
@@ -27,7 +27,7 @@ pub fn normalize_text(text: &str) -> ScrapeResult<String> {
     .unwrap()
     .replace_all(&non_content_moved_before, "$1$3$2");
 
-  let tag_colon_order_fixed = Regex::new(r"(?P<c_tag></[ib]>)\s?:")
+  let tag_colon_order_fixed = Regex::new(r"(?P<c_tag></[ib]>):")
     .unwrap()
     .replace_all(&non_content_moved_after, ":${c_tag}");
 
@@ -48,7 +48,16 @@ pub fn normalize_text(text: &str) -> ScrapeResult<String> {
     _ => (),
   }
 
-  Ok(String::from(trimmed))
+  if remove_formatting_tags {
+    Ok(
+      Regex::new("(?:<i>|</i>|<b>|</b>")
+        .unwrap()
+        .replace_all(trimmed, "")
+        .into_owned(),
+    )
+  } else {
+    Ok(String::from(trimmed))
+  }
 }
 
 #[cfg(test)]
@@ -59,12 +68,16 @@ mod tests {
   #[test]
   fn fixes_tags() {
     assert_eq!(
-      normalize_text(r#"This is a text with a <a href=www.google.de>Link</a> within it."#).unwrap(),
+      normalize_text(
+        r#"This is a text with a <a href=www.google.de>Link</a> within it."#,
+        false
+      )
+      .unwrap(),
       r#"This is a text with a <a href="www.google.de">Link</a> within it."#
     );
     assert_eq!(
       normalize_text(
-        r#"<a href="https://www.eso.org/public/">ESO</a>/<a href="https://www.eso.org/public/teles-instr/lasilla/mpg22/wfi/">WFI</a> (visible);"#
+        r#"<a href="https://www.eso.org/public/">ESO</a>/<a href="https://www.eso.org/public/teles-instr/lasilla/mpg22/wfi/">WFI</a> (visible);"#, false
       ).unwrap(),
       r#"<a href="https://www.eso.org/public/">ESO</a>/<a href="https://www.eso.org/public/teles-instr/lasilla/mpg22/wfi/">WFI</a> (visible);"#
     );
@@ -74,13 +87,14 @@ mod tests {
   fn adds_missing_closing_link_tags() {
     assert_eq!(
       normalize_text(
-        r#"This is a text with a <a href="www.google.de">Link without end-tag <a href="www.google.de">and another Link</a>."#
+        r#"This is a text with a <a href="www.google.de">Link without end-tag <a href="www.google.de">and another Link</a>."#, false
       ).unwrap(),
       r#"This is a text with a <a href="www.google.de">Link without end-tag</a> <a href="www.google.de">and another Link</a>."#
     );
     assert_eq!(
       normalize_text(
-        r#"This is a text with a lonely <a href="www.google.de">Link without end-tag."#
+        r#"This is a text with a lonely <a href="www.google.de">Link without end-tag."#,
+        false
       )
       .unwrap(),
       r#"This is a text with a lonely <a href="www.google.de">Link without end-tag</a>."#
@@ -90,7 +104,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_b_to_front() {
     assert_eq!(
-      normalize_text(r#"Here is<b> bold</b> Text"#).unwrap(),
+      normalize_text(r#"Here is<b> bold</b> Text"#, false).unwrap(),
       r#"Here is <b>bold</b> Text"#
     );
   }
@@ -98,7 +112,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_b_to_back() {
     assert_eq!(
-      normalize_text(r#"Here is <b>bold </b>Text"#).unwrap(),
+      normalize_text(r#"Here is <b>bold </b>Text"#, false).unwrap(),
       r#"Here is <b>bold</b> Text"#
     );
   }
@@ -106,7 +120,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_b_to_front_and_back() {
     assert_eq!(
-      normalize_text(r#"Here is<b> bold </b>Text"#).unwrap(),
+      normalize_text(r#"Here is<b> bold </b>Text"#, false).unwrap(),
       r#"Here is <b>bold</b> Text"#
     );
   }
@@ -114,7 +128,7 @@ mod tests {
   #[test]
   fn leaves_spaces_as_is_in_good_b() {
     assert_eq!(
-      normalize_text(r#"Here is <b>bold</b> Text"#).unwrap(),
+      normalize_text(r#"Here is <b>bold</b> Text"#, false).unwrap(),
       r#"Here is <b>bold</b> Text"#
     );
   }
@@ -122,7 +136,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_i_to_front() {
     assert_eq!(
-      normalize_text(r#"Here is<i> italic</i> Text"#).unwrap(),
+      normalize_text(r#"Here is<i> italic</i> Text"#, false).unwrap(),
       r#"Here is <i>italic</i> Text"#
     );
   }
@@ -130,7 +144,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_i_to_back() {
     assert_eq!(
-      normalize_text(r#"Here is <i>italic </i>Text"#).unwrap(),
+      normalize_text(r#"Here is <i>italic </i>Text"#, false).unwrap(),
       r#"Here is <i>italic</i> Text"#
     );
   }
@@ -138,7 +152,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_i_to_front_and_back() {
     assert_eq!(
-      normalize_text(r#"Here is<i> italic </i>Text"#).unwrap(),
+      normalize_text(r#"Here is<i> italic </i>Text"#, false).unwrap(),
       r#"Here is <i>italic</i> Text"#
     );
   }
@@ -146,7 +160,7 @@ mod tests {
   #[test]
   fn leaves_spaces_as_is_in_good_i() {
     assert_eq!(
-      normalize_text(r#"Here is <i>italic</i> Text"#).unwrap(),
+      normalize_text(r#"Here is <i>italic</i> Text"#, false).unwrap(),
       r#"Here is <i>italic</i> Text"#
     );
   }
@@ -154,7 +168,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_a_to_front() {
     assert_eq!(
-      normalize_text(r#"Here is<a href="www.google.de"> Link</a> Text"#).unwrap(),
+      normalize_text(r#"Here is<a href="www.google.de"> Link</a> Text"#, false).unwrap(),
       r#"Here is <a href="www.google.de">Link</a> Text"#
     );
   }
@@ -162,7 +176,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_a_to_back() {
     assert_eq!(
-      normalize_text(r#"Here is <a href="www.google.de">Link </a>Text"#).unwrap(),
+      normalize_text(r#"Here is <a href="www.google.de">Link </a>Text"#, false).unwrap(),
       r#"Here is <a href="www.google.de">Link</a> Text"#
     );
   }
@@ -170,7 +184,7 @@ mod tests {
   #[test]
   fn moves_spaces_out_of_a_to_front_and_back() {
     assert_eq!(
-      normalize_text(r#"Here is<a href="www.google.de"> Link </a>Text"#).unwrap(),
+      normalize_text(r#"Here is<a href="www.google.de"> Link </a>Text"#, false).unwrap(),
       r#"Here is <a href="www.google.de">Link</a> Text"#
     );
   }
@@ -178,7 +192,7 @@ mod tests {
   #[test]
   fn leaves_spaces_as_is_in_good_a() {
     assert_eq!(
-      normalize_text(r#"Here is <a href="www.google.de">Link</a> Text"#).unwrap(),
+      normalize_text(r#"Here is <a href="www.google.de">Link</a> Text"#, false).unwrap(),
       r#"Here is <a href="www.google.de">Link</a> Text"#
     );
   }
@@ -186,7 +200,7 @@ mod tests {
   #[test]
   fn moves_colon_into_ib() {
     assert_eq!(
-      normalize_text("Some <i>Text</i>: Here").unwrap(),
+      normalize_text("Some <i>Text</i>: Here", false).unwrap(),
       "Some <i>Text:</i> Here"
     )
   }
@@ -194,7 +208,11 @@ mod tests {
   #[test]
   fn removes_caret_in_url() {
     assert_eq!(
-      normalize_text(r#"A <a href="https://www.nasa.gov/>">Link</a> with caret in URL"#).unwrap(),
+      normalize_text(
+        r#"A <a href="https://www.nasa.gov/>">Link</a> with caret in URL"#,
+        false
+      )
+      .unwrap(),
       r#"A <a href="https://www.nasa.gov/">Link</a> with caret in URL"#
     )
   }

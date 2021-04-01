@@ -1,5 +1,4 @@
 use super::super::normalization::normalize_text;
-use super::super::translation::html_to_markdown;
 use super::utils::get_title_meta_block;
 use crate::scraping::ScrapeResult;
 use regex::Regex;
@@ -13,6 +12,5 @@ pub fn get_title(page: &str) -> ScrapeResult<String> {
     .nth(0)
     .expect("Could not find title")
     .as_str();
-  let normalized_title = normalize_text(raw_title)?;
-  Ok(html_to_markdown(&normalized_title).replace("*", ""))
+  normalize_text(raw_title, true)
 }

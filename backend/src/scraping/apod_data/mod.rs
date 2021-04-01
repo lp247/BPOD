@@ -1,6 +1,5 @@
 mod getter;
 mod normalization;
-mod translation;
 
 use super::error::ScrapeResult;
 use crate::apod::APOD;
