@@ -6,7 +6,7 @@ pub fn extract_url(tag: &str) -> &str {
   let end_regex_str = r#"(?:>$|"[\S\s]*>$|"</a>$)"#;
   let href_url_con_regex_str = r#"(?:\s*=\s*"|=|")"#;
   let link_opening_tag_regex_str = format!(
-    r#"<[aA]\s*{href_attr}{href_url_con}{url}{end}"#,
+    r#"<l?[aA]\s*{href_attr}{href_url_con}{url}{end}"#,
     href_attr = href_attr_regex_str,
     href_url_con = href_url_con_regex_str,
     url = url_regex_str,
@@ -56,5 +56,6 @@ mod tests {
     assert_eq!(extract_url("<a href =\"www.google.de\">"), "www.google.de");
     assert_eq!(extract_url("<a href= \"www.google.de\">"), "www.google.de");
     assert_eq!(extract_url("<a href = \"www.google.de\">"), "www.google.de");
+    assert_eq!(extract_url("<la href=\"www.google.de\">"), "www.google.de");
   }
 }
