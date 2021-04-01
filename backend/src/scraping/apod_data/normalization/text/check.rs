@@ -32,7 +32,7 @@ fn check_empty_end_of_text(html: &str) -> ScrapeResult<()> {
 }
 
 fn check_colon_style_tag_order(html: &str) -> ScrapeResult<()> {
-  if Regex::new(r"</[bi]>\s*:").unwrap().is_match(html) {
+  if Regex::new(r"</[bi]>:").unwrap().is_match(html) {
     return Err(ScrapeError::HTMLFixing(String::from(
       "Colon after closing </b> or </i> tag",
     )));
