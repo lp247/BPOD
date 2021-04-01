@@ -14,6 +14,10 @@ pub enum Tag {
   ClosingCenter,
   OpeningP,
   ClosingP,
+  OpeningSup,
+  ClosingSup,
+  OpeningSub,
+  ClosingSub,
 }
 
 pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
@@ -35,6 +39,8 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "a" => Ok(Tag::ClosingA),
       "center" => Ok(Tag::ClosingCenter),
       "p" => Ok(Tag::ClosingP),
+      "sub" => Ok(Tag::ClosingSub),
+      "sup" => Ok(Tag::ClosingSup),
       _ => Err(ScrapeError::HTMLFixing(format!(
         "Could not detect tag {}",
         tag
@@ -47,6 +53,8 @@ pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
       "b" => Ok(Tag::OpeningB),
       "center" => Ok(Tag::OpeningCenter),
       "p" => Ok(Tag::OpeningP),
+      "sub" => Ok(Tag::OpeningSub),
+      "sup" => Ok(Tag::OpeningSup),
       _ => Err(ScrapeError::HTMLFixing(format!(
         "Could not detect tag {}",
         tag
@@ -183,5 +191,33 @@ mod tests {
     assert_eq!(detect_tag("</P>").unwrap() == Tag::ClosingP, true);
     assert_eq!(detect_tag("<p/>").unwrap() == Tag::ClosingP, true);
     assert_eq!(detect_tag("<P/>").unwrap() == Tag::ClosingP, true);
+  }
+
+  #[test]
+  fn detects_opening_sup_tags() {
+    assert_eq!(detect_tag("<sup>").unwrap() == Tag::OpeningSup, true);
+    assert_eq!(detect_tag("<SUP>").unwrap() == Tag::OpeningSup, true);
+  }
+
+  #[test]
+  fn detects_closing_sup_tags() {
+    assert_eq!(detect_tag("</sup>").unwrap() == Tag::ClosingSup, true);
+    assert_eq!(detect_tag("</SUP>").unwrap() == Tag::ClosingSup, true);
+    assert_eq!(detect_tag("<sup/>").unwrap() == Tag::ClosingSup, true);
+    assert_eq!(detect_tag("<SUP/>").unwrap() == Tag::ClosingSup, true);
+  }
+
+  #[test]
+  fn detects_opening_sub_tags() {
+    assert_eq!(detect_tag("<sub>").unwrap() == Tag::OpeningSub, true);
+    assert_eq!(detect_tag("<SUB>").unwrap() == Tag::OpeningSub, true);
+  }
+
+  #[test]
+  fn detects_closing_sub_tags() {
+    assert_eq!(detect_tag("</sub>").unwrap() == Tag::ClosingSub, true);
+    assert_eq!(detect_tag("</SUB>").unwrap() == Tag::ClosingSub, true);
+    assert_eq!(detect_tag("<sub/>").unwrap() == Tag::ClosingSub, true);
+    assert_eq!(detect_tag("<SUB/>").unwrap() == Tag::ClosingSub, true);
   }
 }
