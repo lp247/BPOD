@@ -21,7 +21,10 @@ pub enum Tag {
 }
 
 pub fn detect_tag(tag: &str) -> ScrapeResult<Tag> {
-  if Regex::new(r"^<(?:a |ahref|A |la href)").unwrap().is_match(tag) {
+  if Regex::new(r"^<(?:a |ahref|A |la href|href)")
+    .unwrap()
+    .is_match(tag)
+  {
     return Ok(Tag::OpeningA);
   }
 
@@ -178,6 +181,10 @@ mod tests {
     );
     assert_eq!(
       detect_tag("<la href=\"www.google.de\">").unwrap() == Tag::OpeningA,
+      true
+    );
+    assert_eq!(
+      detect_tag("<href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\">").unwrap() == Tag::OpeningA,
       true
     );
   }

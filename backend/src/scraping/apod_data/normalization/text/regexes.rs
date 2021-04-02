@@ -66,5 +66,9 @@ mod tests {
       "Text <la href\"www.google.de\"> Text",
       &["<la href\"www.google.de\">"],
     );
+    helper(
+      "Text <href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\"> Text",
+      &["<href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\">"],
+    );
   }
 }
