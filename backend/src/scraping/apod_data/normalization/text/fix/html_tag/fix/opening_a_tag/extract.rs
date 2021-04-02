@@ -61,5 +61,6 @@ mod tests {
         assert_eq!(extract_url("<la href=\"www.google.de\">"), "www.google.de");
         assert_eq!(extract_url("<href=\"www.google.de\">"), "www.google.de");
         assert_eq!(extract_url("<a herf=\"www.google.de\">"), "www.google.de");
+        assert_eq!(extract_url("<ah ref=\"www.google.de\">"), "www.google.de");
     }
 }

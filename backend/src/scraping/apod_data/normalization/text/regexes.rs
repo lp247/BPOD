@@ -65,5 +65,9 @@ mod tests {
             "Text <a herf\"www.google.de\"> Text",
             &["<a herf\"www.google.de\">"],
         );
+        helper(
+            "Text <ah ref\"www.google.de\"> Text",
+            &["<ah ref\"www.google.de\">"],
+        );
     }
 }
