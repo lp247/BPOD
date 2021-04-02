@@ -185,9 +185,13 @@ mod tests {
             true
         );
         assert_eq!(
-      detect_tag("<href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\">").unwrap() == Tag::OpeningA,
-      true
-    );
+            detect_tag("<href=\"www.google.de\">").unwrap() == Tag::OpeningA,
+            true
+        );
+        assert_eq!(
+            detect_tag("<a herf=\"www.google.de\">").unwrap() == Tag::OpeningA,
+            true
+        );
     }
 
     #[test]

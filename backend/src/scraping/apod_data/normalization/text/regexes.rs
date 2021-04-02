@@ -58,8 +58,12 @@ mod tests {
             &["<la href\"www.google.de\">"],
         );
         helper(
-      "Text <href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\"> Text",
-      &["<href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\">"],
-    );
+            "Text <href=\"www.google.de\"> Text",
+            &["<href=\"www.google.de\">"],
+        );
+        helper(
+            "Text <a herf\"www.google.de\"> Text",
+            &["<a herf\"www.google.de\">"],
+        );
     }
 }

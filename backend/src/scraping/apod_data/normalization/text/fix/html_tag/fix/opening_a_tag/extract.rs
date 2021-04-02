@@ -2,7 +2,7 @@ use regex::Regex;
 
 pub fn extract_url(tag: &str) -> &str {
     let start_regex_str = r"<(?:l?[aA]\s*)?";
-    let href_attr_regex_str = r"(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff)";
+    let href_attr_regex_str = r"(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff|herf)";
     let url_regex_str = r"(?P<url>[\S\s]*?)";
     let end_regex_str = r#"(?:>$|"[\S\s]*>$|"</a>$)"#;
     let href_url_con_regex_str = r#"(?:\s*=\s*"|=|")"#;
@@ -59,9 +59,7 @@ mod tests {
         assert_eq!(extract_url("<a href= \"www.google.de\">"), "www.google.de");
         assert_eq!(extract_url("<a href = \"www.google.de\">"), "www.google.de");
         assert_eq!(extract_url("<la href=\"www.google.de\">"), "www.google.de");
-        assert_eq!(
-      extract_url("<href=\"http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/\">"),
-      "http://cosmicdiary.org/fpatat/2009/01/19/ x-shooter-goes-on-sky-again-and-again-nights-2-3-and-4/"
-    );
+        assert_eq!(extract_url("<href=\"www.google.de\">"), "www.google.de");
+        assert_eq!(extract_url("<a herf=\"www.google.de\">"), "www.google.de");
     }
 }
