@@ -196,6 +196,10 @@ mod tests {
             detect_tag("<ah ref=\"www.google.de\">").unwrap() == Tag::OpeningA,
             true
         );
+        assert_eq!(
+            detect_tag("<a href=\"//www.google.de\">").unwrap() == Tag::OpeningA,
+            true
+      );
     }
 
     #[test]

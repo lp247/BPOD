@@ -17,12 +17,12 @@ pub fn normalize_url(url: &str) -> String {
             .replace(".dot.", ".")
             .replace("[dot]", ".")
             .replace(".d.o.t.", ".")
+    } else if url_without_invalid_chars.starts_with("//") {
+        format!("https:{}", url_without_invalid_chars)
+    } else if is_rel_website_url(&url_without_invalid_chars) {
+        format!("https://apod.nasa.gov/apod/{}", url_without_invalid_chars)
     } else {
-        if is_rel_website_url(&url_without_invalid_chars) {
-            format!("https://apod.nasa.gov/apod/{}", url_without_invalid_chars)
-        } else {
-            url_without_invalid_chars
-        }
+        url_without_invalid_chars
     }
 }
 
@@ -92,5 +92,10 @@ mod tests {
             normalize_url("mailto:me@server.d.o.t.com"),
             "mailto:me@server.com"
         );
+    }
+
+    #[test]
+    fn adds_missing_protocol() {
+        assert_eq!(normalize_url("//www.google.de"), "https://www.google.de")
     }
 }
