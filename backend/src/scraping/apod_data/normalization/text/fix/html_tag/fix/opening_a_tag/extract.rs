@@ -17,9 +17,9 @@ pub fn extract_url(tag: &str) -> &str {
     Regex::new(link_opening_tag_regex_str.as_str())
         .unwrap()
         .captures(tag)
-        .unwrap()
+        .expect("Could not match link opening tag regex")
         .name("url")
-        .unwrap()
+        .expect("Could not find url in link opening tag")
         .as_str()
 }
 
