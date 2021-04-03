@@ -2,7 +2,7 @@ use regex::Regex;
 
 pub fn extract_url(tag: &str) -> &str {
     let start_regex_str = r"<(?:l?[aA]\s*)?";
-    let href_attr_regex_str = r"(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff|herf)";
+    let href_attr_regex_str = r"(?:ref|href|rhef|hre|hef|hrf|HREF|h ref|hreff|herf|heef)";
     let url_regex_str = r"(?P<url>[\S\s]*?)";
     let end_regex_str = r#"(?:>$|"[\S\s]*>$|"</a>$)"#;
     let href_url_con_regex_str = r#"(?:\s*=\s*"|=|")"#;
@@ -63,5 +63,6 @@ mod tests {
         assert_eq!(extract_url("<a herf=\"www.google.de\">"), "www.google.de");
         assert_eq!(extract_url("<ah ref=\"www.google.de\">"), "www.google.de");
         assert_eq!(extract_url("<a href=\"//www.google.de\">"), "//www.google.de");
+        assert_eq!(extract_url("<a heef=\"www.google.de\">"), "www.google.de");
     }
 }
